@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebVolt – Tvorba webových stránek Boskovice a Blansko | Web bez paušálů</title>
+    <!-- Google Fonts & Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind konfigurace: hluboká půlnoční modř + azurová a indigová záře -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        midnight: {
+                            950: '#05040A',
+                            900: '#090714',
+                            850: '#100C22',
+                            800: '#171130',
+                        },
+                        electric: {
+                            cyan: '#A855F7',
+                            blue: '#8B5CF6',
+                            indigo: '#6366F1',
+                            violet: '#D946EF',
+                        }
+                    },
+                    boxShadow: {
+                        'cyan-glow': '0 0 42px -8px rgba(168, 85, 247, 0.45)',
+                        'card-deep': '0 24px 60px -15px rgba(3, 2, 10, 0.9)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #05040A;
+            color: #F8FAFC;
+        }
+
+        /* Neonově fialovo-purpurovo-indigový gradient podle neonových fotek */
+        .volt-cyan-text {
+            background: linear-gradient(135deg, #C084FC 0%, #A855F7 45%, #F472B6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .volt-cyan-btn {
+            background: linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #C026D3 100%);
+        }
+        .volt-cyan-btn:hover {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #D946EF 100%);
+        }
+
+        /* Plovoucí horní "pill" navigace */
+        .pill-nav {
+            background: rgba(13, 10, 26, 0.8);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(168, 85, 247, 0.22);
+            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Tmavé skleněné karty s jemným neonovým okrajem */
+        .tech-card {
+            background: linear-gradient(180deg, rgba(20, 15, 42, 0.76) 0%, rgba(9, 7, 20, 0.9) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(168, 85, 247, 0.18);
+        }
+        .tech-card:hover {
+            border-color: rgba(192, 132, 252, 0.45);
+        }
+
+        /* Svislá vodicí linka se svítícím neonovým bodem */
+        .guide-line {
+            background: linear-gradient(180deg, rgba(168, 85, 247, 0) 0%, rgba(168, 85, 247, 0.45) 25%, rgba(217, 70, 239, 0.4) 75%, rgba(168, 85, 247, 0) 100%);
+        }
+        .guide-dot {
+            box-shadow: 0 0 14px 3px rgba(192, 132, 252, 0.9);
+        }
+
+        /* 3D iPhone perspektiva a plynulé naklánění při scrollu */
+        .phone-perspective {
+            perspective: 1400px;
+        }
+        .phone-3d-shell {
+            transform-style: preserve-3d;
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow:
+                -24px 32px 70px rgba(0, 0, 0, 0.9),
+                0 0 55px -10px rgba(168, 85, 247, 0.35),
+                inset 0 0 0 2px rgba(192, 132, 252, 0.32);
+        }
+
+        /* Silnější ořez portrétu z vrchu – odstraní bílý prostor nad hlavou */
+        .portrait-frame {
+            object-fit: cover;
+            object-position: 50% 62%;
+            transform: scale(1.52);
+            transform-origin: 50% 60%;
+        }
+
+        /* Ambientní neonová záře na pozadí */
+        .ambient-glow-top {
+            background: radial-gradient(ellipse 72% 52% at 50% 0%, rgba(147, 51, 234, 0.24) 0%, rgba(79, 70, 229, 0.12) 48%, transparent 80%);
+        }
+        .ambient-glow-mid {
+            background: radial-gradient(circle at 82% 35%, rgba(168, 85, 247, 0.14) 0%, transparent 55%),
+                        radial-gradient(circle at 18% 75%, rgba(217, 70, 239, 0.1) 0%, transparent 55%);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-purple-500/35 selection:text-white overflow-x-hidden">
+
+    <!-- ==================== 1. HORNÍ LIŠTA S PLOVOUCÍM "PILL" MENU ==================== -->
+    <header class="fixed top-0 left-0 right-0 z-40 pt-4 px-4 sm:px-6 lg:px-8 pointer-events-none">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            
+            <!-- Logo vlevo (pointer-events-auto) -->
+            <a href="#" class="pointer-events-auto flex items-center gap-2.5 group focus:outline-none">
+                <div class="w-9 h-9 rounded-xl volt-cyan-btn flex items-center justify-center text-white shadow-cyan-glow group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                    </svg>
+                </div>
+                <span class="font-display font-extrabold text-xl tracking-tight text-white">
+                    Web<span class="volt-cyan-text">Volt</span>
+                </span>
+            </a>
+
+            <!-- Středový plovoucí "pill" panel (jako na referencích) -->
+            <nav class="hidden md:flex pointer-events-auto pill-nav rounded-full px-2 py-1.5 items-center gap-1 text-xs font-semibold tracking-wider uppercase">
+                <a href="#uvod" class="nav-pill-link px-4 py-2 rounded-full text-white bg-purple-500/20 border-b-2 border-purple-400 transition-all">Úvod</a>
+                <a href="#porovnani" class="nav-pill-link px-4 py-2 rounded-full text-slate-400 hover:text-white transition-all">Srovnání</a>
+                <a href="#ukazky" class="nav-pill-link px-4 py-2 rounded-full text-slate-400 hover:text-white transition-all">Ukázky</a>
+                <a href="#o-mne" class="nav-pill-link px-4 py-2 rounded-full text-slate-400 hover:text-white transition-all">O mně</a>
+                <a href="#cenik" class="nav-pill-link px-4 py-2 rounded-full text-slate-400 hover:text-white transition-all">Ceník</a>
+            </nav>
+
+            <!-- Pravá akční tlačítka -->
+            <div class="hidden sm:flex pointer-events-auto items-center gap-2.5">
+                <button type="button" onclick="openAuditModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-purple-300 pill-nav hover:border-purple-400/50 transition-all cursor-pointer">
+                    Zhodnotit můj web
+                </button>
+                <a href="#kontakt" onclick="prefillInquiry('Nezávazná ukázka webu zdarma')" class="px-4 py-2 rounded-full text-xs font-bold text-white volt-cyan-btn shadow-cyan-glow transition-all">
+                    Ukázka zdarma
+                </a>
+            </div>
+
+            <!-- Mobilní menu tlačítko -->
+            <button type="button" id="mobile-menu-btn" aria-label="Menu" class="md:hidden pointer-events-auto p-2.5 rounded-full pill-nav text-white focus:outline-none">
+                <svg id="menu-icon-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg id="menu-icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobilní rozbalovací panel -->
+        <div id="mobile-menu" class="hidden md:hidden pointer-events-auto mt-3 max-w-md mx-auto rounded-3xl pill-nav p-5 space-y-2 shadow-2xl">
+            <a href="#uvod" onclick="closeMobileMenu()" class="block px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:bg-purple-500/15">Úvod</a>
+            <a href="#porovnani" onclick="closeMobileMenu()" class="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-purple-500/15">Srovnání webů</a>
+            <a href="#ukazky" onclick="closeMobileMenu()" class="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-purple-500/15">Ukázky & Bresser Úklid</a>
+            <a href="#o-mne" onclick="closeMobileMenu()" class="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-purple-500/15">O mně</a>
+            <a href="#cenik" onclick="closeMobileMenu()" class="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-purple-500/15">Ceník</a>
+            <div class="pt-3 border-t border-purple-400/15 flex flex-col gap-2">
+                <button type="button" onclick="closeMobileMenu(); openAuditModal();" class="w-full py-3 rounded-xl text-xs font-bold text-purple-300 bg-purple-500/15 border border-purple-400/30">
+                    Zhodnotit můj aktuální web
+                </button>
+                <a href="#kontakt" onclick="closeMobileMenu(); prefillInquiry('Nezávazná ukázka webu zdarma');" class="w-full py-3 rounded-xl text-xs font-bold text-white volt-cyan-btn text-center">
+                    Chci ukázku zdarma
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== 2. HERO SEKCE S NEONOVOU FOTKOU, ČÁSTICOVOU VLNOU & 3D IPHONEM ==================== -->
+    <!-- ==================== 2. HERO SEKCE S NEONOVOU FOTKOU, SVĚTELNOU VLNOU & 3D IPHONEM ==================== -->
+    <section id="uvod" class="relative min-h-screen flex items-center pt-28 pb-24 sm:pt-32 sm:pb-32 ambient-glow-top overflow-hidden">
+        <!-- Širokoúhlá neonová vlna na pozadí -->
+        <img src="resource-database-yA7h2_QTg5M-unsplash.jpg"
+             onerror="this.style.display='none'"
+             alt=""
+             aria-hidden="true"
+             class="absolute inset-0 w-full h-full object-cover object-center opacity-50 mix-blend-screen saturate-150 pointer-events-none select-none">
+        <!-- Pomalu se vlnící světelný efekt sladěný s vlnitým pozadím -->
+        <canvas id="slow-wave-canvas" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none opacity-85"></canvas>
+        <div class="absolute inset-0 bg-gradient-to-b from-[#05040A]/45 via-[#05040A]/20 to-[#05040A] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                
+                <!-- Levý sloupec se svislou vodicí linkou a svítícím bodem -->
+                <div class="lg:col-span-7 relative pl-6 sm:pl-9">
+                    <!-- Svislá vodicí linka -->
+                    <div class="absolute left-0 top-0 bottom-0 w-px guide-line"></div>
+                    <!-- Svítící neonový bod -->
+                    <div class="absolute -left-[4.5px] top-3 w-2.5 h-2.5 rounded-full bg-purple-400 guide-dot"></div>
+
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-semibold tracking-wide mb-5">
+                        <span>BLANSKO • BOSKOVICE A OKOLÍ</span>
+                    </div>
+
+                    <h1 class="font-display font-extrabold text-3xl sm:text-5xl lg:text-[3.4rem] text-white tracking-tight leading-[1.12]">
+                        Moderní weby, které <br class="hidden sm:inline">
+                        <span class="volt-cyan-text">přivádějí zákazníky.</span>
+                    </h1>
+
+                    <p class="mt-5 text-base sm:text-lg text-slate-300/90 leading-relaxed max-w-xl">
+                        Jmenuji se Michael Viktor Bresser. Tvořím rychlé a přehledné weby pro místní firmy, řemeslníky a salony — <strong class="text-white font-semibold">za 4 000 Kč jednorázově</strong>, bez měsíčních paušálů a psané přímo na vás.
+                    </p>
+
+                    <div class="mt-6 space-y-2 text-xs sm:text-sm text-slate-400">
+                        <p><span class="text-purple-400 font-semibold">Pro vaše zákazníky:</span> přehled služeb, ceník a zavolání na jedno klepnutí z mobilu.</p>
+                        <p><span class="text-fuchsia-400 font-semibold">Pro vás:</span> 0 Kč měsíčně za provoz, vlastní doména a ukázka předem zdarma.</p>
+                    </div>
+
+                    <!-- Hlavní tlačítka -->
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3.5">
+                        <a href="#kontakt" onclick="prefillInquiry('Chci nezávaznou ukázku webu zdarma')" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-sm sm:text-base font-bold text-white volt-cyan-btn shadow-cyan-glow transition-all hover:-translate-y-0.5">
+                            <span>Chci nezávaznou ukázku zdarma</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                        <button type="button" onclick="openAuditModal()" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-sm sm:text-base font-bold text-white tech-card hover:border-purple-400/50 transition-all cursor-pointer">
+                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                            <span>Zhodnotit můj aktuální web</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pravý sloupec: 3D iPhone mockup s živou ukázkou mobilního webu -->
+                <div class="lg:col-span-5 flex justify-center phone-perspective">
+                    <div id="hero-phone-3d" class="phone-3d-shell relative w-[285px] sm:w-[305px] rounded-[3rem] bg-[#0B1021] p-3 border border-slate-700/70">
+                        <!-- Dynamic Island -->
+                        <div class="mx-auto w-24 h-6 bg-black rounded-full mb-2.5 flex items-center justify-end px-2.5">
+                            <span class="w-2 h-2 rounded-full bg-sky-900/90 border border-sky-400/40"></span>
+                        </div>
+
+                        <!-- Obrazovka telefonu (ukázka čistého lokálního webu) -->
+                        <div class="rounded-[2.25rem] bg-[#F8FAFC] text-slate-900 overflow-hidden shadow-inner">
+                            <!-- Horní lišta uvnitř telefonu -->
+                            <div class="px-4 py-3 bg-white border-b border-slate-200/80 flex items-center justify-between">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
+                                    <span class="font-display font-extrabold text-xs text-slate-900">BRESSER ÚKLID</span>
+                                </div>
+                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Boskovice & Blansko</span>
+                            </div>
+
+                            <!-- Obsah uvnitř displeje -->
+                            <div class="p-4 space-y-3">
+                                <div class="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 text-white p-4">
+                                    <p class="text-[10px] uppercase tracking-wider text-sky-300 font-bold">Úklidové služby na míru</p>
+                                    <h3 class="font-display font-extrabold text-base leading-snug mt-1">
+                                        Spolehlivý úklid bytů, domů i firem
+                                    </h3>
+                                    <p class="text-[11px] text-slate-300 mt-1.5">
+                                        Pravidelný i jednorázový úklid v Boskovicích, Blansku a okolí.
+                                    </p>
+                                    <div class="mt-3 flex gap-2">
+                                        <span class="flex-1 py-2 rounded-xl bg-sky-500 text-white text-[11px] font-bold text-center">📞 Zavolat ihned</span>
+                                        <span class="px-3 py-2 rounded-xl bg-white/10 text-white text-[11px] font-semibold">Ceník</span>
+                                    </div>
+                                </div>
+
+                                <!-- Kartičky služeb v mobilu -->
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="p-2.5 rounded-xl bg-white border border-slate-200/90">
+                                        <p class="text-[11px] font-bold text-slate-900">Domácnosti</p>
+                                        <p class="text-[10px] text-slate-500 mt-0.5">Byty, rodinné domy, okna</p>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-white border border-slate-200/90">
+                                        <p class="text-[11px] font-bold text-slate-900">Firmy & SVJ</p>
+                                        <p class="text-[10px] text-slate-500 mt-0.5">Kanceláře, společné prostory</p>
+                                    </div>
+                                </div>
+
+                                <!-- Rychlá objednávka v mobilu -->
+                                <div class="p-3 rounded-xl bg-white border border-slate-200/90 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] font-bold text-slate-800">Nezávazná poptávka</span>
+                                        <span class="text-[10px] font-semibold text-sky-600">Odpověď do 2 h</span>
+                                    </div>
+                                    <div class="h-7 rounded-lg bg-slate-100 px-2.5 flex items-center text-[10px] text-slate-400">
+                                        Vaše telefonní číslo...
+                                    </div>
+                                    <div class="py-2 rounded-lg bg-emerald-600 text-white text-[11px] font-bold text-center">
+                                        Odeslat poptávku ✓
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spodní lišta telefonu -->
+                        <div class="mx-auto w-24 h-1 bg-slate-600 rounded-full mt-2.5 mb-0.5"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 3. INTERAKTIVNÍ PŘEPÍNAČ (JAKO "TRACKING SWITCH" Z REFERENCE) ==================== -->
+    <section id="porovnani" class="relative py-24 sm:py-32 border-t border-purple-400/15 ambient-glow-mid overflow-hidden">
+        <!-- Sjednocené plynulé pozadí z horního vlnitého motivu -->
+        <img src="resource-database-yA7h2_QTg5M-unsplash.jpg"
+             onerror="this.style.display='none'"
+             alt=""
+             aria-hidden="true"
+             class="absolute inset-0 w-full h-full object-cover object-bottom opacity-20 mix-blend-screen saturate-125 blur-[2px] scale-x-[-1] pointer-events-none select-none">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#05040A] via-[#05040A]/55 to-[#05040A] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <span class="text-xs font-bold uppercase tracking-widest text-purple-400">Rozdíl na první pohled</span>
+                <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-white">
+                    Proč zastaralý web ztrácí zákazníky
+                </h2>
+                <p class="text-sm sm:text-base text-slate-400">
+                    Přepněte si rozdíl mezi běžným starým webem a moderním řešením od WebVoltu.
+                </p>
+
+                <!-- Pill přepínač -->
+                <div class="pt-4 flex justify-center">
+                    <div class="inline-flex p-1.5 rounded-full pill-nav">
+                        <button type="button" id="btn-mode-new" onclick="switchComparison('new')" class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-purple-500/25 border border-purple-400/45 transition-all cursor-pointer">
+                            ⚡ Nový web od WebVoltu
+                        </button>
+                        <button type="button" id="btn-mode-old" onclick="switchComparison('old')" class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-all cursor-pointer">
+                            ⚠️ Běžný starý web
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel zobrazení podle přepínače -->
+            <div class="mt-10 tech-card rounded-3xl p-6 sm:p-10 shadow-card-deep">
+                <!-- Stav: NOVÝ WEB -->
+                <div id="panel-mode-new" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-5 rounded-2xl bg-purple-500/10 border border-purple-400/25 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-purple-300">Rychlost & Mobil</span>
+                            <span class="text-xs font-extrabold text-emerald-400">99 / 100</span>
+                        </div>
+                        <p class="font-display font-bold text-lg text-white">Okamžité načtení</p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Zákazník na mobilu hned vidí, co děláte, kde působíte a jedním klepnutím vám zavolá nebo napíše na WhatsApp.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-400/25 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-fuchsia-300">Vlastnictví</span>
+                            <span class="text-xs font-extrabold text-emerald-400">100 % vaše</span>
+                        </div>
+                        <p class="font-display font-bold text-lg text-white">0 Kč měsíčně za pronájem</p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Doménu i hosting zakládáme na vaše jméno a IČO. Neplatíte žádné agenturní paušály za to, že web jen běží.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-purple-500/10 border border-purple-400/25 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-purple-300">Jistota předem</span>
+                            <span class="text-xs font-extrabold text-emerald-400">Zdarma</span>
+                        </div>
+                        <p class="font-display font-bold text-lg text-white">Ukázka před zaplacením</p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Nejprve vám zdarma připravím návrh vašeho nového webu. Platíte až tehdy, když se vám výsledek opravdu líbí.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stav: STARÝ WEB -->
+                <div id="panel-mode-old" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-5 rounded-2xl bg-rose-500/10 border border-rose-400/25 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-rose-300">Mobilní zobrazení</span>
+                            <span class="text-xs font-extrabold text-rose-400">Problém</span>
+                        </div>
+                        <p class="font-display font-bold text-lg text-white">Malé písmo a zoomování</p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Přes 75 % lidí v Boskovicích a Blansku hledá z mobilu. Když musí stránku přibližovat prsty, po 5 vteřinách odejdou ke konkurenci.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-amber-500/10 border border-amber-400/25 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-amber-300">Skryté poplatky</span>
+                            <span class="text-xs font-extrabold text-amber-400">Paušály</span>
+                        </div>
+                        <p class="font-display font-bold text-lg text-white">Tisíce ročně za „správu“</p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Krabicové systémy a agentury si účtují stovky až tisíce korun každý měsíc — a jakmile přestanete platit, web vám vypnou.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-rose-500/10 border border-rose-400/25 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-rose-300">Důvěryhodnost</span>
+                            <span class="text-xs font-extrabold text-rose-400">Zastaralé</span>
+                        </div>
+                        <p class="font-display font-bold text-lg text-white">Chybějící ceník a fotky</p>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Neaktuální otevírací doba, rozbité animace a nefunkční formulář budí dojem, že firma už ani nefunguje.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 4. UKÁZKY PRÁCE & ŽIVÁ REFERENCE BRESSER ÚKLID ==================== -->
+    <section id="ukazky" class="relative py-20 sm:py-28 border-t border-purple-400/15">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative pl-6 sm:pl-9 mb-12">
+                <div class="absolute left-0 top-0 bottom-0 w-px guide-line"></div>
+                <div class="absolute -left-[4.5px] top-2 w-2.5 h-2.5 rounded-full bg-purple-400 guide-dot"></div>
+
+                <span class="text-xs font-bold uppercase tracking-widest text-purple-400">Portfolio & Řešení</span>
+                <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-white mt-2">
+                    Ukázky webů pro místní podnikatele
+                </h2>
+            </div>
+
+            <!-- Hlavní živá reference: Bresser Úklid s neonovou fotkou notebooku na pozadí -->
+            <div class="tech-card rounded-3xl p-6 sm:p-10 mb-10 shadow-card-deep relative overflow-hidden">
+                <img src="tianyi-ma-WiONHd_zYI4-unsplash.jpg"
+                     onerror="this.style.display='none'"
+                     alt=""
+                     aria-hidden="true"
+                     class="absolute right-0 top-0 h-full w-full lg:w-3/5 object-cover object-center opacity-45 mix-blend-screen saturate-125 pointer-events-none select-none">
+                <div class="absolute inset-0 bg-gradient-to-r from-[#090714] via-[#090714]/75 to-transparent pointer-events-none"></div>
+                
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            ŽIVÁ REFERENCE • WWW.BRESSER-UKLID.CZ
+                        </div>
+                        <h3 class="font-display font-extrabold text-2xl sm:text-3xl text-white">
+                            Bresser Úklid — firemní prezentace a poptávkový web
+                        </h3>
+                        <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+                            Kompletní web mé úklidové firmy působící v Boskovicích, Blansku a okolí. Přehled služeb pro domácnosti, firmy a SVJ, poptávkový formulář, okamžité volání i napojení na WhatsApp — vše vyladěné pro rychlé ovládání na telefonu.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <span class="px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/25 text-purple-300 text-xs font-semibold">Responzivní mobilní verze</span>
+                            <span class="px-3 py-1 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/25 text-fuchsia-300 text-xs font-semibold">Poptávkový formulář</span>
+                            <span class="px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/25 text-purple-300 text-xs font-semibold">Lokální SEO Boskovice & Blansko</span>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col gap-3 justify-end">
+                        <a href="https://www.bresser-uklid.cz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-sm font-bold text-white volt-cyan-btn shadow-cyan-glow transition-all hover:-translate-y-0.5">
+                            <span>Otevřít živý web bresser-uklid.cz</span>
+                            <span>↗</span>
+                        </a>
+                        <a href="#kontakt" onclick="prefillInquiry('Chci podobný firemní web jako je bresser-uklid.cz')" class="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-purple-400/25 transition-colors">
+                            Chci podobný web pro svou firmu
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 oborové karty -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="tech-card rounded-2xl p-6 flex flex-col justify-between transition-all hover:-translate-y-1">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Obor 01</span>
+                        <h3 class="font-display font-bold text-lg text-white mt-2">Truhlářství & Řemesla</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                            Galerie realizací, přehled prací, rychlá poptávka zaměření a mapa regionu.
+                        </p>
+                    </div>
+                    <a href="#kontakt" onclick="prefillInquiry('Ukázka zdarma: Truhlářství / Řemesla')" class="mt-5 pt-4 border-t border-purple-400/15 inline-flex items-center gap-1.5 text-xs font-bold text-purple-300 hover:text-white">
+                        <span>Nechat připravit ukázku</span>
+                        <span>→</span>
+                    </a>
+                </div>
+
+                <div class="tech-card rounded-2xl p-6 flex flex-col justify-between transition-all hover:-translate-y-1">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-fuchsia-400">Obor 02</span>
+                        <h3 class="font-display font-bold text-lg text-white mt-2">Autoservis & Pneuservis</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                            Ceník přezutí a servisu, rychlé objednání termínu a navigace přímo k dílně.
+                        </p>
+                    </div>
+                    <a href="#kontakt" onclick="prefillInquiry('Ukázka zdarma: Autoservis / Pneuservis')" class="mt-5 pt-4 border-t border-purple-400/15 inline-flex items-center gap-1.5 text-xs font-bold text-fuchsia-300 hover:text-white">
+                        <span>Nechat připravit ukázku</span>
+                        <span>→</span>
+                    </a>
+                </div>
+
+                <div class="tech-card rounded-2xl p-6 flex flex-col justify-between transition-all hover:-translate-y-1">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Obor 03</span>
+                        <h3 class="font-display font-bold text-lg text-white mt-2">Kadeřnictví & Salony</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                            Ceník služeb, fotky práce a volitelný <strong class="text-white">online rezervační kalendář</strong> do mobilu.
+                        </p>
+                    </div>
+                    <a href="#kontakt" onclick="prefillInquiry('Ukázka zdarma: Salon / Kadeřnictví (včetně rezervací)')" class="mt-5 pt-4 border-t border-purple-400/15 inline-flex items-center gap-1.5 text-xs font-bold text-purple-300 hover:text-white">
+                        <span>Web i s rezervacemi</span>
+                        <span>→</span>
+                    </a>
+                </div>
+
+                <div class="tech-card rounded-2xl p-6 flex flex-col justify-between transition-all hover:-translate-y-1">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-fuchsia-400">Obor 04</span>
+                        <h3 class="font-display font-bold text-lg text-white mt-2">Bistro & Restaurace</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                            Otevírací doba ihned na očích, odkaz na denní menu a rezervace stolu.
+                        </p>
+                    </div>
+                    <a href="#kontakt" onclick="prefillInquiry('Ukázka zdarma: Bistro / Restaurace')" class="mt-5 pt-4 border-t border-purple-400/15 inline-flex items-center gap-1.5 text-xs font-bold text-fuchsia-300 hover:text-white">
+                        <span>Nechat připravit ukázku</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 5. SEKCE O MNĚ (OŘÍZNUTÁ FOTKA + SKROMNÝ OSOBNÍ TEXT) ==================== -->
+    <section id="o-mne" class="relative py-28 sm:py-36 border-t border-purple-400/15 ambient-glow-mid overflow-hidden">
+        <!-- Sjednocené plynulé pozadí z horního vlnitého motivu -->
+        <img src="resource-database-yA7h2_QTg5M-unsplash.jpg"
+             onerror="this.style.display='none'"
+             alt=""
+             aria-hidden="true"
+             class="absolute inset-0 w-full h-full object-cover object-center opacity-22 mix-blend-screen saturate-125 blur-[3px] pointer-events-none select-none">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#05040A] via-[#05040A]/50 to-[#05040A] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="tech-card rounded-3xl p-6 sm:p-10 lg:p-12 shadow-card-deep">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                    
+                    <!-- Tvá portrétní fotka (oříznutá z vrchu bez přebytečného bílého místa) -->
+                    <div class="lg:col-span-5">
+                        <div class="relative mx-auto max-w-xs sm:max-w-sm">
+                            <div class="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-purple-500/25 via-fuchsia-500/20 to-transparent blur-2xl"></div>
+                            <div class="relative rounded-3xl overflow-hidden border border-purple-400/30 shadow-2xl bg-[#0D0A1A] aspect-square">
+                                <img src="Gemini_Generated_Image_jdxkypjdxkypjdxk.jpg" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+                                     alt="Michael Viktor Bresser" 
+                                     class="w-full h-full portrait-frame">
+                                <!-- Fallback pokud ještě fotka není nahraná ve složce -->
+                                <div class="hidden w-full h-full bg-gradient-to-br from-slate-900 via-purple-950/60 to-fuchsia-950/60 flex flex-col items-center justify-center p-6 text-center">
+                                    <div class="w-16 h-16 rounded-2xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300 font-display font-extrabold text-xl mb-3">
+                                        MB
+                                    </div>
+                                    <p class="text-xs text-slate-400">Michael Viktor Bresser</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skromný osobní text -->
+                    <div class="lg:col-span-7 relative pl-6 sm:pl-8">
+                        <div class="absolute left-0 top-0 bottom-0 w-px guide-line"></div>
+                        <div class="absolute -left-[4.5px] top-2 w-2.5 h-2.5 rounded-full bg-purple-400 guide-dot"></div>
+
+                        <span class="text-xs font-bold uppercase tracking-widest text-purple-400">O mně</span>
+                        <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-white mt-2">
+                            Osobní přístup místo anonymní agentury
+                        </h2>
+
+                        <p class="mt-5 text-sm sm:text-base text-slate-300 leading-relaxed">
+                            Jmenuji se Michael Viktor Bresser a sám v Boskovicích a Blansku podnikám. Při práci pro místní firmy a živnostníky jsem viděl, kolik šikovných řemeslníků, servisů a podnikatelů má buď zastaralý web, který na mobilu nefunguje, nebo platí zbytečně vysoké měsíční poplatky za pronájem stránky.
+                        </p>
+
+                        <p class="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
+                            WebVolt jsem rozjel proto, abyste mohli mít přehledný, moderní web během pár dnů, za jasnou jednorázovou cenu a 100 % psaný na vaše jméno a IČO. Rád za vámi v okolí Blanska či Boskovic přijedu, nafotím vaši dílnu nebo provozovnu a nejprve vám zdarma připravím nezávaznou ukázku.
+                        </p>
+
+                        <div class="mt-6 pt-5 border-t border-purple-400/15 flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <p class="font-display font-bold text-sm sm:text-base text-white">Michael Viktor Bresser</p>
+                                <p class="text-xs text-slate-400">IČO: 21821062 • Boskovice, Blansko a okolí</p>
+                            </div>
+                            <button type="button" onclick="openAuditModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-purple-300 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/30 transition-all cursor-pointer">
+                                Nechat si zhodnotit stávající web →
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 6. CENÍK & KONTAKT ==================== -->
+    <section id="cenik" class="relative py-28 sm:py-36 border-t border-purple-400/15 overflow-hidden">
+        <!-- Sjednocené plynulé pozadí z horního vlnitého motivu -->
+        <img src="resource-database-yA7h2_QTg5M-unsplash.jpg"
+             onerror="this.style.display='none'"
+             alt=""
+             aria-hidden="true"
+             class="absolute inset-0 w-full h-full object-cover object-top opacity-20 mix-blend-screen saturate-125 blur-[2px] scale-y-[-1] pointer-events-none select-none">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#05040A] via-[#05040A]/55 to-[#05040A] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Levý sloupec: Ceník -->
+                <div class="lg:col-span-5 tech-card rounded-3xl p-6 sm:p-8 shadow-card-deep relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 volt-cyan-btn"></div>
+
+                    <span class="inline-block px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-bold uppercase tracking-wider">
+                        Akce pro prvních 5 klientů
+                    </span>
+
+                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white mt-4">
+                        Kompletní firemní web
+                    </h2>
+
+                    <div class="mt-4 flex items-baseline gap-3">
+                        <span class="font-display font-extrabold text-4xl sm:text-5xl text-white">4 000 Kč</span>
+                        <span class="text-lg font-semibold text-slate-500 line-through">6 000 Kč</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Jednorázově • Neplátce DPH • 0 Kč měsíčně za provoz webu
+                    </p>
+
+                    <ul class="mt-6 pt-6 border-t border-purple-400/15 space-y-3 text-sm text-slate-300">
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-purple-400 font-bold">✓</span>
+                            <span>Moderní design vyladěný pro mobil, tablet i počítač</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-purple-400 font-bold">✓</span>
+                            <span>Přehled služeb, ceník, fotogalerie a poptávkový formulář</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-purple-400 font-bold">✓</span>
+                            <span>Tlačítka na okamžité zavolání, WhatsApp a Google Mapy</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-purple-400 font-bold">✓</span>
+                            <span>Doména i hosting založené přímo na vaše jméno a IČO</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-purple-400 font-bold">✓</span>
+                            <span>Osobní nafocení provozovny v Boskovicích, Blansku a okolí</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-6 p-4 rounded-2xl bg-purple-500/10 border border-purple-400/25">
+                        <div class="flex items-center justify-between">
+                            <span class="font-display font-bold text-sm text-white">+ Online rezervační kalendář</span>
+                            <span class="text-xs font-extrabold text-purple-300 bg-midnight-950 px-2.5 py-1 rounded-lg border border-purple-400/30">+ 1 500 Kč</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                            Jednorázový příplatek pro kadeřnictví, masáže či autoservisy — rezervace se automaticky propisují do vašeho Google Kalendáře.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Pravý sloupec: Kontaktní formulář -->
+                <div id="kontakt" class="lg:col-span-7 tech-card rounded-3xl p-6 sm:p-10 shadow-card-deep">
+                    <span class="text-xs font-bold uppercase tracking-widest text-purple-400">Nezávazná poptávka</span>
+                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white mt-2">
+                        Nechte si připravit ukázku zdarma
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2">
+                        Napište pár vět o své firmě nebo pošlete odkaz na současný web. Ozvu se vám co nejdříve s prvním návrhem.
+                    </p>
+
+                    <form id="contact-form" onsubmit="handleContactSubmit(event)" class="mt-6 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="client-name" class="block text-xs font-semibold text-slate-300 mb-1.5">Vaše jméno / Firma *</label>
+                                <input type="text" id="client-name" required placeholder="Jan Novák – Truhlářství" class="w-full px-4 py-3.5 rounded-xl bg-midnight-950/90 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+                            </div>
+                            <div>
+                                <label for="client-contact" class="block text-xs font-semibold text-slate-300 mb-1.5">Telefon nebo e-mail *</label>
+                                <input type="text" id="client-contact" required placeholder="+420 777 000 000" class="w-full px-4 py-3.5 rounded-xl bg-midnight-950/90 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="client-subject" class="block text-xs font-semibold text-slate-300 mb-1.5">O co máte zájem</label>
+                            <input type="text" id="client-subject" value="Nezávazná ukázka webu zdarma (akce 4 000 Kč)" class="w-full px-4 py-3.5 rounded-xl bg-midnight-950/90 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+                        </div>
+
+                        <div>
+                            <label for="client-message" class="block text-xs font-semibold text-slate-300 mb-1.5">Popis činnosti nebo odkaz na aktuální web</label>
+                            <textarea id="client-message" rows="3" placeholder="Např. Mám autoservis v Boskovicích, potřebuji přehledný web s ceníkem..." class="w-full px-4 py-3.5 rounded-xl bg-midnight-950/90 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 px-6 rounded-2xl text-sm sm:text-base font-bold text-white volt-cyan-btn shadow-cyan-glow transition-all hover:-translate-y-0.5 cursor-pointer">
+                            Odeslat nezávaznou poptávku
+                        </button>
+                    </form>
+
+                    <!-- Výsledek odeslání -->
+                    <div id="contact-result" class="hidden mt-5 p-5 rounded-2xl bg-purple-950/60 border border-purple-400/30 space-y-3">
+                        <p class="font-display font-bold text-purple-300 text-sm sm:text-base">✓ Poptávka je připravena k odeslání!</p>
+                        <p class="text-xs sm:text-sm text-slate-300" id="contact-summary-text"></p>
+                        <div class="flex flex-wrap gap-2.5">
+                            <a id="contact-wa-btn" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+                                Odeslat přes WhatsApp
+                            </a>
+                            <a id="contact-mail-btn" href="#" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-purple-400/25 text-xs font-bold">
+                                Odeslat e-mailem
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Přímý kontakt -->
+                    <div class="mt-8 pt-6 border-t border-purple-400/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <a href="tel:+420602236881" class="font-display font-bold text-base text-white hover:text-purple-400 transition-colors">
+                                📞 +420 602 236 881
+                            </a>
+                            <a href="https://wa.me/420602236881?text=Dobr%C3%BD%20den%2C%20m%C3%A1m%20z%C3%A1jem%20o%20nez%C3%A1vaznou%20uk%C3%A1zku%20webu%20od%20WebVolt." target="_blank" rel="noopener noreferrer" class="text-sm font-bold text-emerald-400 hover:text-emerald-300">
+                                💬 Napsat na WhatsApp
+                            </a>
+                        </div>
+                        <p class="text-xs text-slate-400">Michael Viktor Bresser • IČO 21821062</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== PATIČKA ==================== -->
+    <footer class="border-t border-purple-400/15 py-8 text-xs text-slate-400">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="font-display font-extrabold text-sm text-white">Web<span class="volt-cyan-text">Volt</span>.cz</span>
+                <span>• Tvorba webových stránek Boskovice, Blansko a okolí</span>
+            </div>
+            <div>
+                Michael Viktor Bresser • IČO: 21821062 • <a href="tel:+420602236881" class="text-purple-400 hover:underline">+420 602 236 881</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODÁLNÍ OKNO: ZHODNOTIT MŮJ AKTUÁLNÍ WEB ==================== -->
+    <div id="audit-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-[#030208]/85 backdrop-blur-md" onclick="closeAuditModal()"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-lg rounded-3xl tech-card p-6 sm:p-8 shadow-2xl border border-purple-400/35 overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 volt-cyan-btn"></div>
+
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-bold mb-2">
+                            Zdarma do 24 hodin
+                        </span>
+                        <h3 class="font-display font-extrabold text-xl sm:text-2xl text-white">
+                            Zhodnotit můj aktuální web
+                        </h3>
+                    </div>
+                    <button type="button" onclick="closeAuditModal()" aria-label="Zavřít" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer">
+                        ✕
+                    </button>
+                </div>
+
+                <p class="text-sm text-slate-300 mt-2 leading-relaxed">
+                    Pošlete odkaz na své stávající stránky. Zkontroluji zobrazení na mobilu, rychlost a přehlednost a pošlu vám 3–4 konkrétní tipy, co zlepšit.
+                </p>
+
+                <form onsubmit="handleAuditSubmit(event)" class="mt-5 space-y-3.5">
+                    <div>
+                        <label for="modal-url" class="block text-xs font-semibold text-slate-300 mb-1.5">Adresa vašeho webu *</label>
+                        <input type="text" id="modal-url" required placeholder="např. www.mojefirma.cz" class="w-full px-4 py-3 rounded-xl bg-midnight-950 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+                    </div>
+                    <div>
+                        <label for="modal-contact" class="block text-xs font-semibold text-slate-300 mb-1.5">E-mail nebo telefon / WhatsApp *</label>
+                        <input type="text" id="modal-contact" required placeholder="Kam mám poslat výsledek?" class="w-full px-4 py-3 rounded-xl bg-midnight-950 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+                    </div>
+                    <div>
+                        <label for="modal-note" class="block text-xs font-semibold text-slate-300 mb-1.5">Poznámka (volitelné)</label>
+                        <input type="text" id="modal-note" placeholder="Např. Špatně se zobrazuje na mobilu..." class="w-full px-4 py-3 rounded-xl bg-midnight-950 border border-purple-400/25 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+                    </div>
+                    <button type="submit" class="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white volt-cyan-btn shadow-cyan-glow cursor-pointer">
+                        Odeslat ke zhodnocení zdarma
+                    </button>
+                </form>
+
+                <div id="modal-audit-result" class="hidden mt-5 p-4 rounded-2xl bg-purple-950/70 border border-purple-400/30 space-y-3">
+                    <p class="font-display font-bold text-purple-300 text-sm">✓ Žádost je připravena!</p>
+                    <p class="text-xs text-slate-300" id="modal-audit-summary"></p>
+                    <div class="flex flex-wrap gap-2">
+                        <a id="modal-wa-link" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+                            Odeslat přes WhatsApp
+                        </a>
+                        <a id="modal-mail-link" href="#" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-purple-400/25 text-xs font-bold">
+                            Odeslat e-mailem
+    <!-- ==================== JAVASCRIPT: POMALÝ VLNOVÝ EFEKT, 3D IPHONE & INTERAKCE ==================== -->
+    <script>
+        // 1. Pomalu plynoucí neonové světelné vlny sladěné s horním pozadím
+        (function initSlowNeonWave() {
+            const canvas = document.getElementById('slow-wave-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width = 0;
+            let height = 0;
+            let t = 0;
+
+            function resize() {
+                width = canvas.width = canvas.offsetWidth;
+                height = canvas.height = canvas.offsetHeight;
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                // Velmi pomalý pohyb, aby vlny plynuly klidně a nerušily čtení
+                t += 0.0045;
+
+                const waves = [
+                    { amp: 46, freq: 0.0055, speed: 1.0, yBase: height * 0.34, color: 'rgba(192, 132, 252, 0.24)', lineWidth: 2.2 },
+                    { amp: 58, freq: 0.0042, speed: 0.75, yBase: height * 0.50, color: 'rgba(139, 92, 246, 0.22)', lineWidth: 2.6 },
+                    { amp: 38, freq: 0.0068, speed: 1.25, yBase: height * 0.66, color: 'rgba(217, 70, 239, 0.18)', lineWidth: 1.8 }
+                ];
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+
+                for (let w = 0; w < waves.length; w++) {
+                    const wave = waves[w];
+                    ctx.beginPath();
+                    for (let x = 0; x <= width; x += 12) {
+                        const y =
+                            wave.yBase +
+                            Math.sin(x * wave.freq + t * wave.speed + w * 1.4) * wave.amp +
+                            Math.cos(x * wave.freq * 0.5 - t * 0.6) * (wave.amp * 0.35);
+                        if (x === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    ctx.strokeStyle = wave.color;
+                    ctx.lineWidth = wave.lineWidth;
+                    ctx.shadowColor = wave.color;
+                    ctx.shadowBlur = 18;
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            draw();
+        })();
+
+        // 2. 3D naklánění iPhonu při scrollování i pohybu myši
+        (function init3DPhone() {
+            const phone = document.getElementById('hero-phone-3d');
+            if (!phone) return;
+
+            let mouseTiltX = 0;
+            let mouseTiltY = 0;
+
+            function applyTransform() {
+                const scrollY = window.scrollY;
+                const maxScroll = 650;
+                const progress = Math.min(1, scrollY / maxScroll);
+                const rotateY = -14 + progress * 22 + mouseTiltY;
+                const rotateX = 7 - progress * 12 + mouseTiltX;
+                const translateY = progress * -18;
+                phone.style.transform = `translateY(${translateY}px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+            }
+
+            window.addEventListener('scroll', applyTransform, { passive: true });
+            window.addEventListener('mousemove', (e) => {
+                const nx = (e.clientX / window.innerWidth) - 0.5;
+                const ny = (e.clientY / window.innerHeight) - 0.5;
+                mouseTiltY = nx * 12;
+                mouseTiltX = -ny * 9;
+                applyTransform();
+            }, { passive: true });
+
+            applyTransform();
+        })();
+
+        // 3. Interaktivní přepínač srovnání (Nový vs. Starý web)
+        function switchComparison(mode) {
+            const btnNew = document.getElementById('btn-mode-new');
+            const btnOld = document.getElementById('btn-mode-old');
+            const panelNew = document.getElementById('panel-mode-new');
+            const panelOld = document.getElementById('panel-mode-old');
+
+            if (mode === 'new') {
+                btnNew.className = 'px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-purple-500/25 border border-purple-400/45 transition-all cursor-pointer';
+                btnOld.className = 'px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-all cursor-pointer';
+                panelNew.classList.remove('hidden');
+                panelOld.classList.add('hidden');
+            } else {
+                btnOld.className = 'px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-rose-500/20 border border-rose-400/40 transition-all cursor-pointer';
+                btnNew.className = 'px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-all cursor-pointer';
+                panelOld.classList.remove('hidden');
+                panelNew.classList.add('hidden');
+            }
+        }
+
+        // 4. Mobilní menu
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconOpen = document.getElementById('menu-icon-open');
+        const iconClose = document.getElementById('menu-icon-close');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden', !isHidden);
+            iconOpen.classList.toggle('hidden', isHidden);
+            iconClose.classList.toggle('hidden', !isHidden);
+        });
+
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+        }
+
+        // 5. Modální okno pro zhodnocení aktuálního webu
+        const auditModal = document.getElementById('audit-modal');
+
+        function openAuditModal() {
+            auditModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('modal-url').focus(), 100);
+        }
+
+        function closeAuditModal() {
+            auditModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !auditModal.classList.contains('hidden')) {
+                closeAuditModal();
+            }
+        });
+
+        function prefillInquiry(text) {
+            const input = document.getElementById('client-subject');
+            if (input) input.value = text;
+        }
+
+        function handleAuditSubmit(event) {
+            event.preventDefault();
+            const urlVal = document.getElementById('modal-url').value.trim();
+            const contactVal = document.getElementById('modal-contact').value.trim();
+            const noteVal = document.getElementById('modal-note').value.trim();
+
+            const msg = `Dobrý den, prosím o bezplatné zhodnocení mého aktuálního webu:\n• Web: ${urlVal}\n• Kontakt: ${contactVal}${noteVal ? `\n• Poznámka: ${noteVal}` : ''}`;
+            const encoded = encodeURIComponent(msg);
+
+            document.getElementById('modal-audit-summary').textContent = `Web ${urlVal} (${contactVal}) je připraven k odeslání.`;
+            document.getElementById('modal-wa-link').href = `https://wa.me/420602236881?text=${encoded}`;
+            document.getElementById('modal-mail-link').href = `mailto:info@webvolt.cz?subject=${encodeURIComponent('Zhodnocení webu: ' + urlVal)}&body=${encoded}`;
+            document.getElementById('modal-audit-result').classList.remove('hidden');
+        }
+
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('client-name').value.trim();
+            const contact = document.getElementById('client-contact').value.trim();
+            const subject = document.getElementById('client-subject').value.trim();
+            const message = document.getElementById('client-message').value.trim();
+
+            const fullText = `Dobrý den, mám zájem o spolupráci přes WebVolt.cz:\n• Jméno / Firma: ${name}\n• Kontakt: ${contact}\n• Poptávka: ${subject}${message ? `\n• Zpráva: ${message}` : ''}`;
+            const encoded = encodeURIComponent(fullText);
+
+            document.getElementById('contact-summary-text').textContent = `Děkuji, ${name}. Odešlete připravenou zprávu jedním kliknutím přes WhatsApp nebo e-mail:`;
+            document.getElementById('contact-wa-btn').href = `https://wa.me/420602236881?text=${encoded}`;
+            document.getElementById('contact-mail-btn').href = `mailto:info@webvolt.cz?subject=${encodeURIComponent(subject)}&body=${encoded}`;
+            document.getElementById('contact-result').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
